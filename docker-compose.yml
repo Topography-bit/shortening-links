@@ -14,7 +14,7 @@ services:
       - shortening_links_nw
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
-      interval: 10s
+      interval: 3s
       timeout: 5s
       retries: 5
   pgadmin:
@@ -26,7 +26,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: IVxijz7Zvob3
       PGADMIN_DEFAULT_EMAIL: kiruhahaj9@gmail.com
     ports:
-      - "8001:80"
+      - "8002:80"
     networks:
       - shortening_links_nw  
   redis:
@@ -38,6 +38,29 @@ services:
       - "6379:6379"
     networks:
       - shortening_links_nw
+  app:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    container_name: app
+    volumes:
+      - .:/app
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=IVxijz7Zvob3
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DATABASE=mydatabase
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - '8001:8000'
+    networks:
+      - shortening_links_nw
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes: 
   postgres:
   pgadmin_data:
