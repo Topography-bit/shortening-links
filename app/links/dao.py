@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 from app.database.database import async_session_maker
 from app.links.model import links
 
@@ -35,5 +35,16 @@ class LinksDAO:
             res = await session.execute(query)
             return res.scalar_one_or_none()
         
-    # @staticmethod
-    # async def how_many_clicks(
+    @staticmethod
+    async def how_many_clicks(short_code: str):
+        async with async_session_maker() as session:
+            query = select(links.clicks).where(links.short_code == short_code)
+            res = await session.execute(query)
+            return res.scalar_one_or_none()
+
+    @staticmethod
+    async def add_click(short_code: str):
+        async with async_session_maker() as session:
+            query = update(links).where(links.short_code == short_code).values(clicks=links.clicks + 1)
+            res = await session.execute(query)
+            await session.commit()

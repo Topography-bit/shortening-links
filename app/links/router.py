@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
+from app.links.redisdao import RedisLinksDAO
 from app.links.utils import generate_a_short_code
 from app.links.dao import LinksDAO
 
@@ -16,8 +17,6 @@ async def generate_short_link(long_url: str):
 
 
 @router.get('/{short_code}')
-async def redirect_short_link(short_code: str, request: Request):
-    url = await LinksDAO.find_long_url(short_code)
-    if url == None:
-        raise HTTPException(status_code=404, detail="Ссылка не найдена")
+async def redirect_short_link(short_code: str):
+    url = await RedisLinksDAO.get_link_cached(short_code)
     return RedirectResponse(url=url, status_code=302)
