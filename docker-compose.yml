@@ -53,6 +53,7 @@ services:
       - DATABASE=mydatabase
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_DATABASE=0
     ports:
       - '8001:8000'
     networks:
