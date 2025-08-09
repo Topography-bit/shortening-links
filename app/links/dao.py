@@ -27,3 +27,13 @@ class LinksDAO:
             )
             await session.execute(query)
             await session.commit()
+
+    @staticmethod
+    async def find_long_url(short_code: str):
+        async with async_session_maker() as session:
+            query = select(links.long_url).where(links.short_code == short_code)
+            res = await session.execute(query)
+            return res.scalar_one_or_none()
+        
+    # @staticmethod
+    # async def how_many_clicks(
