@@ -24,3 +24,10 @@ class UserDAO:
             )
             await session.execute(query)
             await session.commit()
+
+    @staticmethod
+    async def find_user_by_username(username: str):
+        async with async_session_maker() as session:
+            query = select(Users).where(Users.username == username)
+            res = await session.execute(query)
+            return res.scalar_one_or_none()

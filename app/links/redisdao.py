@@ -1,4 +1,5 @@
 import json
+from app.auth.schemas import SUserAuth
 from app.database.database import redis_client
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -31,3 +32,4 @@ class RedisLinksDAO:
                 }
                 await redis_client.set(short_code, json.dumps(cache_data), ex=86400)
             return long_url
+    

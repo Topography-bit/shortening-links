@@ -15,7 +15,15 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     REDIS_DATABASE: int
 
-    class config:
+    EMAIL_HOST: str
+    EMAIL_PORT: int
+    EMAIL_USER: str
+    EMAIL_PASSWORD: str
+    EMAIL_FROM: str
+
+
+
+    class Config:
         case_sensitive = True
         env_file = '.env'
 

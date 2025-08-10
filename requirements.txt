@@ -6,6 +6,7 @@ bcrypt
 cffi
 cryptography
 fastapi
+fastapi-mail
 greenlet
 idna
 Mako

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, Response
 from passlib.context import CryptContext
+from pydantic import EmailStr
 from app.auth.auth import auth_jwt
 import jwt
 
@@ -20,15 +21,19 @@ def verify_pw(password: str, hashed_password: str) -> bool:
 TOKEN_TYPE = 'type'
 ACCESS_TOKEN = 'access'
 REFRESH_TOKEN = 'refresh'
+VERIFY_TOKEN = 'verify'
 
-def encode_jwt(token_type: str, payload = dict, private_key: str = auth_jwt.private_key_path.read_text(), algorithm=auth_jwt.algorithm):
+def encode_jwt(token_type: str, payload = dict, private_key: str = auth_jwt.private_key, algorithm=auth_jwt.algorithm):
     to_encode = payload.copy()
     now = datetime.now(timezone.utc)
 
     if token_type == ACCESS_TOKEN:
         expire = now + timedelta(minutes=auth_jwt.access_token_expire_minutes)
-    else:
-        expire = now + timedelta(days=auth_jwt.resfresh_token_expire_days)
+    elif token_type == REFRESH_TOKEN:
+        expire = now + timedelta(days=auth_jwt.refresh_token_expire_days)
+    elif token_type == VERIFY_TOKEN:
+        expire = now + timedelta(minutes=auth_jwt.verify_token_expire_minutes)
+
 
     to_encode.update(
         exp=expire,
@@ -82,10 +87,29 @@ async def create_refresh_token(response: Response, user_data: SUserAuth):
         httponly=True
     )
 
-def decode_jwt(token: str, public_key: str = auth_jwt.public_key_path.read_text(), algorithm: str = auth_jwt.algorithm):
+async def create_verify_token(response: Response, email: EmailStr, username: str, password: str):
+
+    hashed_pw = hash_pw(password)
+
+    payload = {
+        'email': email,
+        'username': username,
+        'password': hashed_pw,
+        'purpose': 'email_verification'
+    }
+    token = await create_jwt(token_data=payload, token_type=VERIFY_TOKEN)
+    response.set_cookie(
+        key='verify',
+        value=token,
+        httponly=True,
+        max_age=600
+    )
+
+
+def decode_jwt(token: str, public_key: str = auth_jwt.public_key, algorithm: str = auth_jwt.algorithm):
     try:
         decoded = jwt.decode(
-            jwt=token,
+            token,
             key=public_key,
             algorithms=[algorithm]
         )
