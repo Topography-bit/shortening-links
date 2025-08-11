@@ -18,3 +18,5 @@ class RedisUsersDAO:
         if not res:
             raise HTTPException(status_code=401, detail='Код подтверждения не найден или истёк')
         return res
+    
+    

@@ -16,13 +16,14 @@ class LinksDAO:
         
         
     @staticmethod
-    async def add_links_to_db(short_code: str, long_url: str, clicks: int = 0):
+    async def add_links_to_db(short_code: str, long_url: str, user_id: int, clicks: int = 0):
         async with async_session_maker() as session:
             now = datetime.now(timezone.utc).replace(tzinfo=None)
             query = insert(links).values(
                 short_code=short_code,
                 long_url=long_url,
                 clicks=clicks,
+                user_id=user_id,
                 created_at=now
             )
             await session.execute(query)

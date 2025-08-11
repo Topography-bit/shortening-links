@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, null
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, func, null
 from app.database.database import Base
 from sqlalchemy.orm import relationship
 
@@ -10,6 +10,6 @@ class links(Base):
     long_url = Column(String, nullable=False)
     clicks = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey('users.id'), index=True)
-    created_at = Column(DateTime)
+    created_at = Column(DateTime(timezone=True), default=func.now())
 
     # user = relationship("Users", back_populates="links")
