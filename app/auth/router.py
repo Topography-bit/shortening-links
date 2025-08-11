@@ -2,6 +2,7 @@ from fastapi import APIRouter, Cookie, HTTPException, Response
 
 from app.auth.dao import UserDAO
 from app.auth.redisdao import RedisUsersDAO
+from app.auth.refresh_tokens_service import refresh_access_tokens
 from app.auth.schemas import SUserAuth
 from app.auth.utils import create_access_token, create_refresh_token, create_verify_token, decode_jwt, hash_pw, verify_pw
 from app.auth.emailservice import send_verify_email
@@ -39,7 +40,7 @@ async def login(response: Response, user_data: SUserAuth):
     if not verify:
         raise HTTPException(status_code=401, detail='Неверный логин или пароль!')
     
-    await create_access_token(response, user_data)
+    await create_access_token(response, user_data.email)
     await create_refresh_token(response, user_data)
 
     return 'Успешный вход'
@@ -67,3 +68,12 @@ async def verify_email(verification_code: str, verification_token: str | None = 
     await UserDAO.add_user_to_db(username=username, email=email, hashed_password=password)
 
     return 'Ваш email успешно подтвержден, вы успешно создали учетную запись! Теперь пожалуйста войдите в нее.'
+
+
+@router.post('/refresh')
+async def refresh_tokens_route(
+    response: Response,
+    access_token: str = Cookie(None, alias='access'),
+    refresh_token: str = Cookie(None, alias='refresh')
+):
+    return await refresh_access_tokens(response, access_token, refresh_token)

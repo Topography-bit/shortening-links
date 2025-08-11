@@ -54,8 +54,8 @@ async def create_jwt(token_data: dict, token_type: str):
     payload.update(token_data)
     return encode_jwt(token_type=token_type, payload=payload)
 
-async def create_access_token(response: Response, user_data: SUserAuth):
-    user = await UserDAO.find_user_by_email(user_data.email)
+async def create_access_token(response: Response, user_email: EmailStr):
+    user = await UserDAO.find_user_by_email(user_email)
     if not user:
         raise HTTPException(status_code=401, detail='Вы не зарегистрированы!')
     payload = {
@@ -67,7 +67,8 @@ async def create_access_token(response: Response, user_data: SUserAuth):
     response.set_cookie(
         key='access',
         value=token,
-        httponly=True
+        httponly=True,
+        max_age=900
     )
 
 
@@ -84,7 +85,8 @@ async def create_refresh_token(response: Response, user_data: SUserAuth):
     response.set_cookie(
         key='refresh',
         value=token,
-        httponly=True
+        httponly=True,
+        max_age=2592000
     )
 
 async def create_verify_token(response: Response, email: EmailStr, username: str, password: str):
@@ -114,5 +116,7 @@ def decode_jwt(token: str, public_key: str = auth_jwt.public_key, algorithm: str
             algorithms=[algorithm]
         )
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Время действия кода истекло")
+        raise HTTPException(status_code=401, detail="Время действия токена истекло")
     return decoded
+
+
