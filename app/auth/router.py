@@ -77,3 +77,17 @@ async def refresh_tokens_route(
     refresh_token: str = Cookie(None, alias='refresh')
 ):
     return await refresh_access_tokens(response, access_token, refresh_token)
+
+
+@router.post('/logout')
+async def logout(response: Response, access_token: str = Cookie(None, alias='access'), refresh_token: str = Cookie(None, alias='refresh')):
+
+    response.delete_cookie(
+        key='access'
+    )
+
+    response.delete_cookie(
+        key='refresh'
+    )
+
+    return 'Вы успешно вышли из своего аккаунта'
