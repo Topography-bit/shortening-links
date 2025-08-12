@@ -11,21 +11,21 @@ async def refresh_access_tokens(
         refresh_token: str | None = Cookie(None, alias='refresh')
         ):
     
-    if not access_token or not refresh_token:
+    if not refresh_token:
         raise HTTPException(status_code=401, detail='Пожалуйста, перезайдите')
     
-    payload = decode_jwt(access_token)
+    payload = decode_jwt(refresh_token)
+    if not payload:
+        raise HTTPException(status_code=401, detail='Некорректный payload resresh token')
 
+    token_type = payload.get('type')
 
-    now = datetime.now(timezone.utc)
+    if token_type != 'refresh':
+        raise HTTPException(status_code=401, detail='Недействительный тип токена для обновления')
 
-    timestamp_expire_access_token = payload.get('exp')
     email = payload.get('email')
 
-    expire_access_token = datetime.fromtimestamp(timestamp_expire_access_token, timezone.utc)
+    await create_access_token(response, user_email=email)
 
-    if now >= expire_access_token - timedelta(minutes=5):
-        await create_access_token(response, user_email=email)
-        return 'Ваш access токен успешно обновлен'
-    
+
     return 'Ещё не время обновлять токены'
