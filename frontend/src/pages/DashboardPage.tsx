@@ -1,8 +1,20 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Toast from '../components/Toast'
 import QRModal from '../components/QRModal'
 
 export default function DashboardPage() {
+  const authed = localStorage.getItem('shortit_auth') === '1'
+  if (!authed) {
+    return (
+      <div className="max-w-md mx-auto glass p-6 rounded-2xl">
+        <h1 className="text-2xl font-bold mb-2">Мои ссылки</h1>
+        <p className="text-sm text-slate-300">
+          Пожалуйста, воспользуйтесь меню «Мой аккаунт» вверху, чтобы войти или зарегистрироваться и просмотреть свои ссылки.
+        </p>
+      </div>
+    )
+  }
   const historyKey = 'shortit_history'
   const initial = useMemo(() => {
     try { return JSON.parse(localStorage.getItem(historyKey) || '[]') as string[] } catch { return [] as string[] }

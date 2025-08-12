@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { apiPost } from '../lib/api'
 import { useNavigate } from 'react-router-dom'
 
-export default function LoginPage() {
+export default function LoginPage({ onLoggedIn }: { onLoggedIn?: () => void }) {
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -16,6 +16,9 @@ export default function LoginPage() {
     setError(null)
     try {
       const res = await apiPost<any>('/log_in', { email, username, password })
+      // mark authenticated locally
+      localStorage.setItem('shortit_auth', '1')
+      onLoggedIn?.()
       navigate('/')
     } catch (err: any) {
       setError(err.message ?? 'Ошибка')
